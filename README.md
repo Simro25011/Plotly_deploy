@@ -4,4 +4,4 @@ Roza has a partially completed dashboard that she needs to finish. She has a com
 
 Our task is to assist Rosa  using PLotly.s ,a JavaScript data visualization library, to create an interactive data visualization for the web. The completed work will be displayed in a portfolio we created.
 
-Check our Work : https://Simro25011.github.io/Plotly-Deploy/
+Check our Work : https://Simro25011.github.io/Plotly_deploy/
