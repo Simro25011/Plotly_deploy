@@ -17,7 +17,9 @@ function init() {
     var firstSample = sampleNames[0];
     buildCharts(firstSample);
     buildMetadata(firstSample);
-    
+    buildBubbleChart(firstSample);
+    buildGaugeChart(firstSample);
+
   });
 }
 
@@ -28,7 +30,8 @@ function optionChanged(newSample) {
   // Fetch new data each time a new sample is selected
   buildMetadata(newSample);
   buildCharts(newSample);
-  
+  buildBubbleChart(newSample);
+  buildGaugeChart(newSample);
 }
 
 // Demographics Panel 
@@ -58,7 +61,6 @@ function buildMetadata(sample) {
 function buildCharts(sample) {
   // 2. Use d3.json to load and retrieve the samples.json file 
   d3.json("samples.json").then((data) => {
-    console.log(data);
     // 3. Create a variable that holds the samples array. 
     var samplesdata = data.samples;
 
@@ -72,23 +74,19 @@ function buildCharts(sample) {
     // 6. Create variables that hold the otu_ids, otu_labels, and sample_values.
 
     // otu_ids
-    var otuIds = results.otu_ids.map(numericIds => {
-      return numericIds;
-    }).reverse();
-
-    var top_otu_ids = otuIds.slice(0, 10).map(numericIds => {
+    var top_otu_ids = results.otu_ids.slice(0, 10).map(numericIds => {
       return 'OTU ' + numericIds;
     }).reverse();
     
 
     // otu_labels
-    var otuLabels = results.otu_labels.reverse();
-    var top_otu_labels = otuLabels.slice(0, 10).reverse();
+   
+    var top_otu_labels = results.otu_labels.slice(0, 10).reverse();
     
 
     // samples_values
-    var samplevalues = results.sample_values.reverse();
-    var top_sample_values = samplevalues.slice(0, 10).reverse();
+   
+    var top_sample_values = results.sample_values.slice(0, 10).reverse();
     
 
 
@@ -97,16 +95,15 @@ function buildCharts(sample) {
     //  so the otu_ids with the most bacteria are last. 
 
     // 8. Create the trace for the bar chart. 
-    var bar_trace = [{
-      
-      x: top_sample_values,
-      y: top_otu_ids,
-      text : top_otu_labels,
-      type : "bar",
-      orientation : "h"
-        
-     
-    }];
+    var bar_trace = [
+      {
+        x: top_sample_values,
+        y: top_otu_ids,
+        text : top_otu_labels,
+        type : "bar",
+        orientation : 'h',
+      }
+    ];
       
     // 9. Create the layout for the bar chart. 
     var barLayout = {
@@ -115,10 +112,29 @@ function buildCharts(sample) {
      
     };
     // 10. Use Plotly to plot the data with the layout. 
-    Plotly.newPlot("bar", bar_trace , barLayout);
-  
+    Plotly.newPlot("bar", bar_trace , barLayout)
+  });
+}
 
+  
+  
+function buildBubbleChart(sample) {
+  d3.json("samples.json").then((data) => {
     // 1. Create the trace for the bubble chart.
+    var resultArray = data
+        .samples
+        .filter(sampleObj => {
+          return sampleObj.id == sample
+        });
+        
+    var result = resultArray[0];
+        
+    var otuIds = result.otu_ids.map(numericIds => {
+      return numericIds;
+    }).reverse();
+
+    var samplevalues = result.sample_values.reverse();
+    var otuLabels = result.otu_labels.reverse();
 
     var bubbleData = [
       {
@@ -147,16 +163,19 @@ function buildCharts(sample) {
 
     // 3. Use Plotly to plot the data with the layout.
     Plotly.newPlot("bubble", bubbleData, bubbleLayout);
+  });
+}
+
+function buildGaugeChart(sample) {
+  d3.json("samples.json").then((data) => {
   
   // step: 1-3initialize variables that hold arrays for the sample 
     //that is selected from the dropdown menu on the webpage
-    var metdata = data.metadata;
+    var metadata = data.metadata;
     // Filter the data for the object with the desired sample number
-    var resultArray = metdata.filter(sampleObj => sampleObj.id == sample);
-    console.log(resultArray);
+    var resultArray = metadata.filter(sampleObj => sampleObj.id == sample);
 
     var result = resultArray[0];
-    console.log(result);
 
     //initialize variables and convert to a float
     var wFreq = result.wfreq
@@ -192,6 +211,6 @@ function buildCharts(sample) {
     };
 
     // 6. Use Plotly to plot the gauge data and layout.
-    Plotly.newPlot("gauge", gaugeData, gaugeLayout)
-    });
-  }
+    Plotly.newPlot("gauge", gaugeData, gaugeLayout);
+  });
+}
